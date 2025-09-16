@@ -2,33 +2,51 @@ name: Pages deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]   # run only on pushes to main
 
 jobs:
   build-docs:
+    name: Build Jekyll site
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
+      - name: Set up Ruby 3.4 (with Bundler cache)
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
-          bundler-cache: true # Caches installed gems
+          ruby-version: "3.4"
+          bundler-cache: true   # caches gems automatically for faster builds
+          # docs: https://github.com/ruby/setup-ruby
 
-      - name: Install Jekyll and dependencies
+      - name: Install gems (bundle install)
+        working-directory: docs
         run: bundle install
-        working-directory: ./docs
 
-      - name: Build Jekyll site
+      - name: Build site (jekyll)
+        working-directory: docs
         run: bundle exec jekyll build
-        working-directory: ./docs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs/_site'
+          path: ./docs/_site
 
-          
+  deploy-pages:
+    name: Deploy Pages
+    runs-on: ubuntu-latest
+    needs: build-docs
+    # Grant the permissions required for Pages deployment
+    permissions:
+      pages: write
+      id-token: write
+    # Surface the deployed URL in the run summary and the Deployments pane
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
