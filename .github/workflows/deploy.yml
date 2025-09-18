@@ -17,8 +17,8 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.4"
-          bundler-cache: true   # caches gems automatically for faster builds
-          # docs: https://github.com/ruby/setup-ruby
+          bundler-cache: true  
+         
 
       - name: Install gems (bundle install)
         working-directory: docs
@@ -37,11 +37,11 @@ jobs:
     name: Deploy Pages
     runs-on: ubuntu-latest
     needs: build-docs
-    # Grant the permissions required for Pages deployment
+    # Grants the permissions required for Pages deployment
     permissions:
       pages: write
       id-token: write
-    # Surface the deployed URL in the run summary and the Deployments pane
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
